@@ -1,5 +1,5 @@
 import React from "react";
-import "./App.css";
+import "../App.css";
 
 const FocusGraph = ({ data }) => {
   if (!data || data.length === 0) return null;

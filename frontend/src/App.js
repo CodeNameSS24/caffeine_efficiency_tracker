@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import FormInput from "./FormInput";
-import FocusGraph from "./FocusGraph";
-import AlertBox from "./AlertBox";
+import FormInput from "./components/FormInput";
+import FocusGraph from "./components/FocusGraph";
+import AlertBox from "./components/AlertBox";
 import "./App.css";
 
 function App() {

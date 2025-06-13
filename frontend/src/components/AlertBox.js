@@ -1,5 +1,5 @@
 import React from "react";
-import "./App.css";
+import "../App.css";
 
 const AlertBox = ({ optimalTime, crashTime }) => {
   if (!optimalTime && !crashTime) return null;

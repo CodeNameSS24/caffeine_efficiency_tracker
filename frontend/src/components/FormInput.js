@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./App.css";
+import "../App.css";
 
 const FormInput = ({ onSubmit, loading }) => {
   const [formData, setFormData] = useState({
