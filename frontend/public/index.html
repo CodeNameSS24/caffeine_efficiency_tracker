@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Caffeine Efficiency Tracker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #1a1a2e 100%
+        );
+        --dark-gradient: linear-gradient(
+          135deg,
+          #0f0f23 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --surface-dark: rgba(15, 15, 35, 0.95);
+        --surface-light: rgba(255, 255, 255, 0.05);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-dark: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--dark-gradient);
+        min-height: 100vh;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-weight: 400;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        position: relative;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--accent-gradient);
+        border-radius: 2px;
+        box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+      }
+
+      .header h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        margin-bottom: 16px;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #4facfe 50%,
+          #00f2fe 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .header .icon {
+        display: inline-block;
+        margin-right: 16px;
+        font-size: 0.9em;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.3));
+      }
+
+      .header p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        font-weight: 400;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: minmax(400px, 1fr) minmax(600px, 2fr);
+        gap: 40px;
+        margin-bottom: 40px;
+      }
+
+      .panel {
+        background: var(--surface-dark);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--shadow-dark);
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      .panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 50%
+        );
+        border-radius: 24px;
+        pointer-events: none;
+      }
+
+      .panel:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-dark), var(--shadow-glow);
+        border-color: rgba(79, 172, 254, 0.3);
+      }
+
+      .panel h2 {
+        color: var(--text-primary);
+        margin-bottom: 32px;
+        font-size: 1.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.01em;
+      }
+
+      .panel h2 i {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 32px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+        letter-spacing: -0.005em;
+      }
+
+      .form-group label i {
+        color: #4facfe;
+        font-size: 1.1rem;
+      }
+
+      .input-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 18px 20px;
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        font-family: "Inter", sans-serif;
+      }
+
+      .form-group input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #4facfe;
+        background: rgba(79, 172, 254, 0.05);
+        box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.1),
+          0 0 20px rgba(79, 172, 254, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .range-info {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+        font-weight: 400;
+      }
+
+      .predict-btn {
+        width: 100%;
+        padding: 20px;
+        background: var(--accent-gradient);
+        color: #ffffff;
+        border: none;
+        border-radius: 16px;
+        font-size: 1.125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: "Inter", sans-serif;
+        letter-spacing: -0.005em;
+        box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .predict-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .predict-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(79, 172, 254, 0.4);
+      }
+
+      .predict-btn:hover::before {
+        left: 100%;
+      }
+
+      .predict-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .predict-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .predict-btn:disabled:hover {
+        box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+      }
+
+      .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 32px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        padding: 20px;
+      }
+
+      .insights {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 32px;
+      }
+
+      .insight-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.05) 0%,
+          rgba(79, 172, 254, 0.05) 100%
+        );
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .insight-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--accent-gradient);
+      }
+
+      .insight-card:hover {
+        transform: translateY(-4px);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.08) 0%,
+          rgba(79, 172, 254, 0.08) 100%
+        );
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(79, 172, 254, 0.3);
+      }
+
+      .insight-card h3 {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: -0.005em;
+      }
+
+      .insight-card h3 i {
+        color: #4facfe;
+        font-size: 1rem;
+      }
+
+      .insight-card .value {
+        font-size: 2rem;
+        font-weight: 800;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        color: var(--text-secondary);
+        font-style: italic;
+        padding: 40px;
+        font-weight: 500;
+      }
+
+      .loading i {
+        color: #4facfe;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .error {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.1) 0%,
+          rgba(220, 38, 38, 0.05) 100%
+        );
+        color: #fca5a5;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        display: none;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        font-weight: 500;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 80px 40px;
+      }
+
+      .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 24px;
+        opacity: 0.3;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+      }
+
+      .empty-state p {
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .tooltip {
+        position: relative;
+        cursor: help;
+        color: var(--text-muted);
+        transition: color 0.2s;
+      }
+
+      .tooltip:hover {
+        color: #4facfe;
+      }
+
+      .tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--surface-dark);
+        color: var(--text-primary);
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        z-index: 1000;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        font-weight: 500;
+      }
+
+      @media (max-width: 1024px) {
+        .main-content {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+
+        .panel {
+          padding: 30px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px 16px;
+        }
+
+        .header {
+          margin-bottom: 40px;
+        }
+
+        .insights {
+          grid-template-columns: 1fr;
+        }
+
+        .panel {
+          padding: 24px;
+        }
+
+        .chart-container {
+          height: 300px;
+          padding: 16px;
+        }
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--surface-dark);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--accent-gradient);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      }
+
+      /* Animation for cards appearing */
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .insight-card {
+        animation: slideUp 0.6s ease-out forwards;
+      }
+
+      .insight-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .insight-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .insight-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .insight-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><i class="fas fa-coffee icon"></i>Caffeine Efficiency Tracker</h1>
+        <p>Optimize your caffeine intake for peak focus and productivity</p>
+      </div>
+
+      <div class="main-content">
+        <div class="panel input-panel">
+          <h2><i class="fas fa-sliders-h"></i>Your Input</h2>
+          <form id="caffeineForm">
+            <div class="form-group">
+              <label for="sleepHours">
+                <i class="fas fa-bed"></i>Sleep Hours Last Night
+                <span
+                  class="tooltip"
+                  data-tooltip="How many hours did you sleep last night?"
+                >
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="sleepHours"
+                  min="3"
+                  max="12"
+                  step="0.5"
+                  value="7"
+                  required
+                />
+              </div>
+              <div class="range-info">Range: 3-12 hours</div>
+            </div>
+
+            <div class="form-group">
+              <label for="caffeineIntake">
+                <i class="fas fa-coffee"></i>Current Caffeine Intake (mg)
+                <span
+                  class="tooltip"
+                  data-tooltip="Total caffeine consumed today (1 cup coffee ≈ 95mg)"
+                >
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="caffeineIntake"
+                  min="0"
+                  max="500"
+                  step="10"
+                  value="100"
+                  required
+                />
+              </div>
+              <div class="range-info">Range: 0-500mg (1 cup coffee ≈ 95mg)</div>
+            </div>
+
+            <div class="form-group">
+              <label for="fatigueLevel">
+                <i class="fas fa-battery-quarter"></i>Current Fatigue Level
+                <span
+                  class="tooltip"
+                  data-tooltip="Rate your current tiredness (1=very alert, 10=exhausted)"
+                >
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="fatigueLevel"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value="5"
+                  required
+                />
+              </div>
+              <div class="range-info">
+                Scale: 1 (very alert) - 10 (exhausted)
+              </div>
+            </div>
+
+            <button type="submit" class="predict-btn" id="predictBtn">
+              <i class="fas fa-chart-line"></i>
+              Analyze My Caffeine Efficiency
+            </button>
+          </form>
+        </div>
+
+        <div class="panel results-panel">
+          <h2><i class="fas fa-chart-area"></i>Focus Level Prediction</h2>
+          <div class="error" id="errorMessage"></div>
+          <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Analyzing your data...
+          </div>
+
+          <div id="results" style="display: none">
+            <div class="chart-container">
+              <canvas id="focusChart"></canvas>
+            </div>
+
+            <div class="insights">
+              <div class="insight-card">
+                <h3><i class="fas fa-clock"></i>Optimal Time</h3>
+                <div class="value" id="optimalTime">--:--</div>
+              </div>
+              <div class="insight-card">
+                <h3><i class="fas fa-exclamation-triangle"></i>Crash Alert</h3>
+                <div class="value" id="crashTime">None</div>
+              </div>
+              <div class="insight-card">
+                <h3><i class="fas fa-arrow-up"></i>Peak Focus</h3>
+                <div class="value" id="peakFocus">--</div>
+              </div>
+              <div class="insight-card">
+                <h3><i class="fas fa-chart-line"></i>Average Focus</h3>
+                <div class="value" id="avgFocus">--</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" id="emptyState">
+            <i class="fas fa-chart-line"></i>
+            <h3>Ready to Analyze</h3>
+            <p>
+              Enter your sleep, caffeine, and fatigue data to see your focus
+              prediction
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE_URL = "http://localhost:5000";
+      let focusChart = null;
+
+      document
+        .getElementById("caffeineForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const sleepHours = parseFloat(
+            document.getElementById("sleepHours").value
+          );
+          const caffeineIntake = parseFloat(
+            document.getElementById("caffeineIntake").value
+          );
+          const fatigueLevel = parseFloat(
+            document.getElementById("fatigueLevel").value
+          );
+
+          showLoading(true);
+          hideError();
+
+          try {
+            const response = await fetch(`${API_BASE_URL}/predict`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                sleepHours: sleepHours,
+                caffeineIntake: caffeineIntake,
+                fatigueLevel: fatigueLevel,
+              }),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Failed to get prediction");
+            }
+
+            const data = await response.json();
+            displayResults(data);
+          } catch (error) {
+            console.error("Error:", error);
+            showError(
+              error.message ||
+                "Failed to connect to the server. Make sure the Flask API is running."
+            );
+          } finally {
+            showLoading(false);
+          }
+        });
+
+      function showLoading(show) {
+        const loadingEl = document.getElementById("loading");
+        const predictBtn = document.getElementById("predictBtn");
+
+        if (show) {
+          loadingEl.style.display = "block";
+          predictBtn.disabled = true;
+          predictBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i>Analyzing...';
+        } else {
+          loadingEl.style.display = "none";
+          predictBtn.disabled = false;
+          predictBtn.innerHTML =
+            '<i class="fas fa-chart-line"></i>Analyze My Caffeine Efficiency';
+        }
+      }
+
+      function showError(message) {
+        const errorEl = document.getElementById("errorMessage");
+        errorEl.textContent = message;
+        errorEl.style.display = "block";
+      }
+
+      function hideError() {
+        document.getElementById("errorMessage").style.display = "none";
+      }
+
+      function displayResults(data) {
+        document.getElementById("emptyState").style.display = "none";
+        document.getElementById("results").style.display = "block";
+
+        document.getElementById("optimalTime").textContent =
+          data.optimalCaffeineTime || "--:--";
+        document.getElementById("crashTime").textContent =
+          data.crashTimeAlert || "None";
+
+        const focusLevels = data.focusGraph.map((item) => item.focusLevel);
+        const peakFocus = Math.max(...focusLevels);
+        const avgFocus =
+          focusLevels.reduce((sum, val) => sum + val, 0) / focusLevels.length;
+
+        document.getElementById("peakFocus").textContent =
+          Math.round(peakFocus);
+        document.getElementById("avgFocus").textContent = Math.round(avgFocus);
+
+        createFocusChart(data.focusGraph);
+      }
+
+      function createFocusChart(focusData) {
+        const ctx = document.getElementById("focusChart").getContext("2d");
+
+        if (focusChart) {
+          focusChart.destroy();
+        }
+
+        const labels = focusData.map((item) => item.time);
+        const focusLevels = focusData.map((item) => item.focusLevel);
+
+        focusChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Focus Level",
+                data: focusLevels,
+                borderColor: "#4facfe",
+                backgroundColor: "rgba(79, 172, 254, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: "#4facfe",
+                pointBorderColor: "#ffffff",
+                pointBorderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 10,
+                pointHoverBackgroundColor: "#00f2fe",
+                pointHoverBorderColor: "#ffffff",
+                pointHoverBorderWidth: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                backgroundColor: "rgba(15, 15, 35, 0.95)",
+                titleColor: "#ffffff",
+                bodyColor: "#94a3b8",
+                borderColor: "#4facfe",
+                borderWidth: 1,
+                cornerRadius: 12,
+                displayColors: false,
+                titleFont: {
+                  size: 14,
+                  weight: "bold",
+                },
+                bodyFont: {
+                  size: 13,
+                },
+                padding: 12,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                  display: true,
+                  text: "Focus Level (%)",
+                  color: "#94a3b8",
+                  font: {
+                    size: 13,
+                    weight: "600",
+                  },
+                },
+                grid: {
+                  color: "rgba(255, 255, 255, 0.1)",
+                  lineWidth: 1,
+                },
+                ticks: {
+                  color: "#64748b",
+                  font: {
+                    size: 12,
+                    weight: "500",
+                  },
+                },
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: "Time",
+                  color: "#94a3b8",
+                  font: {
+                    size: 13,
+                    weight: "600",
+                  },
+                },
+                grid: {
+                  color: "rgba(255, 255, 255, 0.1)",
+                  lineWidth: 1,
+                },
+                ticks: {
+                  color: "#64748b",
+                  font: {
+                    size: 12,
+                    weight: "500",
+                  },
+                },
+              },
+            },
+            interaction: {
+              intersect: false,
+              mode: "index",
+            },
+          },
+        });
+      }
+
+      // Enhanced input validation with visual feedback
+      function validateInput(input, min, max) {
+        const value = parseFloat(input.value);
+        if (value < min || value > max || isNaN(value)) {
+          input.style.borderColor = "#ef4444";
+          input.style.boxShadow = "0 0 0 4px rgba(239, 68, 68, 0.1)";
+        } else {
+          input.style.borderColor = "rgba(255, 255, 255, 0.1)";
+          input.style.boxShadow = "none";
+        }
+      }
+
+      document
+        .getElementById("sleepHours")
+        .addEventListener("input", function () {
+          validateInput(this, 3, 12);
+        });
+
+      document
+        .getElementById("caffeineIntake")
+        .addEventListener("input", function () {
+          validateInput(this, 0, 500);
+        });
+
+      document
+        .getElementById("fatigueLevel")
+        .addEventListener("input", function () {
+          validateInput(this, 1, 10);
+        });
+
+      // Add smooth scroll behavior for better UX
+      document.documentElement.style.scrollBehavior = "smooth";
+    </script>
+  </body>
+</html>
