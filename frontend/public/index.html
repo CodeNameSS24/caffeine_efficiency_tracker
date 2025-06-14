@@ -559,10 +559,59 @@
       .insight-card:nth-child(4) {
         animation-delay: 0.4s;
       }
-    </style>
+    
+    /* LIGHT MODE VARIANTS */
+    .light-mode {
+      --primary-gradient: linear-gradient(135deg, #fefefe 0%, #c0c0c0 100%);
+      --dark-gradient: linear-gradient(135deg, #fefefe 0%, #d0e1ff 100%);
+      --accent-gradient: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      --text-primary: #111827;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --surface-dark: rgba(255, 255, 255, 0.95);
+      --surface-light: rgba(0, 0, 0, 0.05);
+      --border-color: rgba(0, 0, 0, 0.1);
+      --shadow-dark: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+      --shadow-glow: 0 0 40px rgba(250, 100, 100, 0.3);
+    }
+
+    #theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      z-index: 1000;
+      cursor: pointer;
+      font-size: 1.5rem;
+      background: var(--surface-dark);
+      padding: 10px 14px;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+      color: var(--text-primary);
+    }
+
+    #moon-icon {
+      display: none;
+    }
+
+    .light-mode #moon-icon {
+      display: inline;
+    }
+
+    .light-mode #sun-icon {
+      display: none;
+    }
+
+</style>
   </head>
   <body>
-    <div class="container">
+    
+    <!-- 🌞/🌙 Theme Toggle Button -->
+    <div id="theme-toggle">
+      <i class="fas fa-sun" id="sun-icon"></i>
+      <i class="fas fa-moon" id="moon-icon"></i>
+    </div>
+
+<div class="container">
       <div class="header">
         <h1><i class="fas fa-coffee icon"></i>Caffeine Efficiency Tracker</h1>
         <p>Optimize your caffeine intake for peak focus and productivity</p>
@@ -947,5 +996,13 @@
       // Add smooth scroll behavior for better UX
       document.documentElement.style.scrollBehavior = "smooth";
     </script>
-  </body>
+  
+    <script>
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        document.body.classList.toggle("light-mode");
+      });
+    </script>
+
+</body>
 </html>
+
