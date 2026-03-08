@@ -6,18 +6,19 @@ const FocusGraph = ({ data }) => {
 
   const maxFocus = Math.max(...data.map((d) => d.focusLevel));
   const minFocus = Math.min(...data.map((d) => d.focusLevel));
-  const range = maxFocus - minFocus;
+  const range = maxFocus - minFocus || 1; // Prevent division by zero
+  const peak_index = data.findIndex(d => d.focusLevel === maxFocus);
 
   return (
-    <div className="focus-graph">
-      <h3>Focus Level Prediction</h3>
+    <div className="focus-graph glass-panel">
+      <h3>Predicted Focus Trajectory</h3>
       <div className="graph-container">
         <div className="y-axis">
-          <span className="y-label high">{Math.round(maxFocus)}</span>
+          <span className="y-label high">{Math.round(maxFocus)}%</span>
           <span className="y-label mid">
-            {Math.round((maxFocus + minFocus) / 2)}
+            {Math.round((maxFocus + minFocus) / 2)}%
           </span>
-          <span className="y-label low">{Math.round(minFocus)}</span>
+          <span className="y-label low">{Math.round(minFocus)}%</span>
         </div>
 
         <div className="graph-area">
@@ -30,8 +31,8 @@ const FocusGraph = ({ data }) => {
                 x2="0%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#4CAF50" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#4CAF50" stopOpacity="0.2" />
+                <stop offset="0%" stopColor="#c77dff" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#c77dff" stopOpacity="0.0" />
               </linearGradient>
             </defs>
 
@@ -43,7 +44,7 @@ const FocusGraph = ({ data }) => {
                 y1={i * 40}
                 x2="400"
                 y2={i * 40}
-                stroke="#e0e0e0"
+                stroke="rgba(255, 255, 255, 0.05)"
                 strokeWidth="1"
               />
             ))}
@@ -53,14 +54,14 @@ const FocusGraph = ({ data }) => {
               d={`M ${data
                 .map(
                   (d, i) =>
-                    `${(i / (data.length - 1)) * 380 + 20},${
-                      200 - ((d.focusLevel - minFocus) / range) * 160 - 20
+                    `${(i / (data.length - 1)) * 380 + 20},${200 - ((d.focusLevel - minFocus) / range) * 160 - 20
                     }`
                 )
                 .join(" L ")}`}
-              stroke="#4CAF50"
-              strokeWidth="3"
+              stroke="#e0aaff"
+              strokeWidth="4"
               fill="none"
+              style={{ filter: "drop-shadow(0px 0px 8px rgba(224, 170, 255, 0.5))" }}
             />
 
             {/* Area under curve */}
@@ -68,12 +69,23 @@ const FocusGraph = ({ data }) => {
               d={`M 20,180 L ${data
                 .map(
                   (d, i) =>
-                    `${(i / (data.length - 1)) * 380 + 20},${
-                      200 - ((d.focusLevel - minFocus) / range) * 160 - 20
+                    `${(i / (data.length - 1)) * 380 + 20},${200 - ((d.focusLevel - minFocus) / range) * 160 - 20
                     }`
                 )
                 .join(" L ")} L 400,180 Z`}
               fill="url(#focusGradient)"
+            />
+
+            {/* Peak indicator line */}
+            <line
+              x1={(peak_index / (data.length - 1)) * 380 + 20}
+              y1="10"
+              x2={(peak_index / (data.length - 1)) * 380 + 20}
+              y2="180"
+              stroke="#00f5d4"
+              strokeWidth="2"
+              strokeDasharray="6,4"
+              style={{ filter: "drop-shadow(0px 0px 4px rgba(0, 245, 212, 0.5))" }}
             />
 
             {/* Data points */}
@@ -82,9 +94,9 @@ const FocusGraph = ({ data }) => {
                 key={i}
                 cx={(i / (data.length - 1)) * 380 + 20}
                 cy={200 - ((d.focusLevel - minFocus) / range) * 160 - 20}
-                r="4"
-                fill="#2E7D32"
-                stroke="#fff"
+                r={i === peak_index ? "6" : "4"}
+                fill={i === peak_index ? "#00f5d4" : "#10002b"}
+                stroke={i === peak_index ? "#ffffff" : "#c77dff"}
                 strokeWidth="2"
               />
             ))}

@@ -14,7 +14,9 @@ function App() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:5000/predict", {
+      // Use environment variable for API URL or fallback to localhost
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5001";
+      const response = await fetch(`${apiUrl}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,7 +32,7 @@ function App() {
       setPredictions(data);
     } catch (err) {
       setError(
-        "Unable to connect to prediction service. Make sure the API is running on port 5000."
+        "Unable to connect to prediction service. Please ensure the backend is running."
       );
       console.error("Error:", err);
     } finally {
@@ -39,39 +41,44 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header className="app-header">
-        <h1>☕ Caffeine Efficiency Tracker</h1>
-        <p>Optimize your caffeine intake based on sleep and fatigue levels</p>
-      </header>
+    <div className="app-wrapper">
+      <div className="bg-image"></div>
+      <div className="bg-overlay"></div>
 
-      <main className="main-content">
-        <div className="container">
-          <FormInput onSubmit={handleFormSubmit} loading={loading} />
+      <div className="App">
+        <header className="app-header">
+          <h1>☕ Caffeine Catalyst</h1>
+          <p>Supercharge your focus with precision timing</p>
+        </header>
 
-          {error && (
-            <div className="error-message">
-              <p>{error}</p>
-            </div>
-          )}
+        <main className="main-content">
+          <div className="container">
+            <FormInput onSubmit={handleFormSubmit} loading={loading} />
 
-          {predictions && (
-            <div className="results-section">
-              <AlertBox
-                optimalTime={predictions.optimalCaffeineTime}
-                crashTime={predictions.crashTimeAlert}
-              />
-              <FocusGraph data={predictions.focusGraph} />
-            </div>
-          )}
-        </div>
-      </main>
+            {error && (
+              <div className="error-message">
+                <p>{error}</p>
+              </div>
+            )}
 
-      <footer className="app-footer">
-        <p>
-          Track your caffeine efficiency and optimize your daily performance
-        </p>
-      </footer>
+            {predictions && (
+              <div className="results-section">
+                <AlertBox
+                  optimalTime={predictions.optimalCaffeineTime}
+                  crashTime={predictions.crashTimeAlert}
+                />
+                <FocusGraph data={predictions.focusGraph} />
+              </div>
+            )}
+          </div>
+        </main>
+
+        <footer className="app-footer">
+          <p>
+            Track your caffeine efficiency and optimize your daily performance 🚀
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }
