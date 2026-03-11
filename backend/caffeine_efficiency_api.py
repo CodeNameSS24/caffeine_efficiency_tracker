@@ -103,13 +103,21 @@ def predict_focus():
         metabolism = input_data.get('metabolism', 'normal')
         l_theanine = input_data.get('lTheanine', False)
 
-        # Handle timezone gracefully by accepting client's local time if available
-        # Fallback to server's datetime.now() if not provided (e.g. direct API usage)
+        # Handle timezone gracefully by accepting client's timezone offset
+        # The offset is in minutes (e.g. IST is -330 for +5:30)
+        # We will parse the ISO string and apply the offset to get local time
         client_time_str = input_data.get('currentTime')
+        timezone_offset = input_data.get('timezoneOffset', 0)
+        
         if client_time_str:
             try:
-                # Replace 'Z' with +00:00 to handle standard JS ISO strings
-                base_time = datetime.fromisoformat(client_time_str.replace('Z', '+00:00'))
+                # Parse as UTC first
+                utc_time = datetime.fromisoformat(client_time_str.replace('Z', '+00:00'))
+                # Apply the offset (JavaScript getTimezoneOffset() returns opposite sign)
+                # If offset is -330 (IST), we want to ADD 330 minutes to UTC to get local time
+                base_time = utc_time - timedelta(minutes=timezone_offset)
+                # Remove tzinfo so it becomes naive local time for formatting
+                base_time = base_time.replace(tzinfo=None)
             except ValueError:
                 base_time = datetime.now()
         else:

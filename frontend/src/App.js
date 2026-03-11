@@ -14,10 +14,11 @@ function App() {
     setError(null);
 
     try {
-      // Add the user's current local time to the payload
+      // Add the user's current local time and timezone offset to the payload
       const payload = {
         ...formData,
-        currentTime: new Date().toISOString()
+        currentTime: new Date().toISOString(),
+        timezoneOffset: new Date().getTimezoneOffset()
       };
 
       // Use environment variable for API URL or fallback to localhost
