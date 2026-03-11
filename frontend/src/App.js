@@ -14,6 +14,12 @@ function App() {
     setError(null);
 
     try {
+      // Add the user's current local time to the payload
+      const payload = {
+        ...formData,
+        currentTime: new Date().toISOString()
+      };
+
       // Use environment variable for API URL or fallback to localhost
       const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${apiUrl}/predict`, {
@@ -21,7 +27,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

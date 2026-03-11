@@ -103,8 +103,20 @@ def predict_focus():
         metabolism = input_data.get('metabolism', 'normal')
         l_theanine = input_data.get('lTheanine', False)
 
-        # Time intervals for the next 10 hours
-        time_intervals = [datetime.now() + timedelta(hours=i) for i in range(10)]
+        # Handle timezone gracefully by accepting client's local time if available
+        # Fallback to server's datetime.now() if not provided (e.g. direct API usage)
+        client_time_str = input_data.get('currentTime')
+        if client_time_str:
+            try:
+                # Replace 'Z' with +00:00 to handle standard JS ISO strings
+                base_time = datetime.fromisoformat(client_time_str.replace('Z', '+00:00'))
+            except ValueError:
+                base_time = datetime.now()
+        else:
+            base_time = datetime.now()
+
+        # Time intervals for the next 10 hours based on client's local time
+        time_intervals = [base_time + timedelta(hours=i) for i in range(10)]
 
         # Base prediction
         base_prediction = model.predict([[sleep, caffeine, fatigue]])[0]
