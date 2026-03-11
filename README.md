@@ -1,33 +1,34 @@
 # ☕ Caffeine Efficiency Tracker
 
-A smart and interactive web application that helps users **optimize caffeine consumption** by predicting their **focus levels** based on **sleep duration**, **caffeine intake**, and **fatigue level**.
+A smart, interactive, full-stack web application that helps users **optimize caffeine consumption** by predicting their **focus levels** based on **sleep patterns**, **fatigue levels**, and **personalized bio-profile metrics** (tolerance, metabolism rate, and supplementation).
 
 ---
 
 ## 🚀 Live Demo
 
-> [COMING SOON: Deployed URL Here]
+> **[View Live App](https://caffeine-efficiency-tracker.vercel.app/)**
 
 ---
 
 ## 🧠 What It Does
 
-Using a trained Machine Learning model, this tracker predicts:
-- 🔥 Your **focus level over the next 10 hours**
+Using a trained Machine Learning model (RandomForestRegressor) integrated with dynamic pharmacokinetic rules, this tracker simulates and predicts:
+- 🔥 Your **focus level trajectory over the next 10 hours**
 - ⚡ **Best time to consume caffeine** for peak productivity
 - ⚠️ A **crash alert** if your focus is expected to dip significantly
 - 📊 A dynamic graph showing your **hourly focus variation**
+- 💡 **Actionable real-time advice** tailored precisely to your physiological inputs
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer        | Technologies              |
-|--------------|---------------------------|
-| **Frontend** | React.js, HTML, CSS       |
-| **Backend**  | Flask (Python)            |
-| **Styling**  | Custom CSS (with gradient design, blur effects) |
-| **Extras**   | Flask-CORS, REST APIs, Responsive UI |
+| Layer        | Technologies                                      |
+|--------------|---------------------------------------------------|
+| **Frontend** | React.js, CSS (Glassmorphism UI)                  |
+| **Backend**  | Flask, Python                                     |
+| **ML & Data**| scikit-learn, Pandas, NumPy                       |
+| **Extras**   | Vercel Deployment, REST APIs, Responsive UI       |
 
 ---
 
@@ -38,18 +39,16 @@ Using a trained Machine Learning model, this tracker predicts:
 ![Screenshot 2025-06-23 210108](https://github.com/user-attachments/assets/50da02df-5ac9-479c-bd11-bc7095238af5)
 ![Screenshot 2025-06-23 210141](https://github.com/user-attachments/assets/bbfe06b6-e559-4f1c-bb59-a9bed45417ec)
 
-
-
 ---
 
 ## 📦 Features
 
-- 🎯 **Fully responsive interface** for desktop and mobile devices
+- 🎯 **Advanced Bio-Profile Settings**: Fine-tune predictions based on your caffeine tolerance (low, normal, high), metabolism rate (slow, normal, fast), and L-Theanine supplementation.
+- ☕ **Predefined Beverage Presets**: Quickly select common drinks (Espresso, Black Tea, Energy Drink, etc.) to set caffeine intake.
 - ⚡ Real-time **optimal caffeine time** predictor
 - 📉 **Crash alert** warning when energy is expected to dip
-- 📈 **Focus graph** visualization for the next 10 hours
-- 🌐 Clean, smooth graph with **hour-by-hour focus prediction**.
--  Intuitive and easy to interpret at a glance.
+- 📈 **Focus graph** visualization for the next 10 hours with smooth trajectories.
+- 📱 **Fully responsive, glassmorphism UI** for desktop and mobile devices.
 
 ---
 
@@ -58,20 +57,19 @@ Using a trained Machine Learning model, this tracker predicts:
 ### ⚡ Optimal Caffeine Time
 - The **time when your predicted focus level is the highest** after caffeine intake.
 - This is the **best time to consume coffee** to maximize productivity.
-- Based on your unique input of sleep, fatigue, and caffeine.
+- Dynamically affected by tolerance (which changes peak height).
 
 ### 🔺 Peak Focus
 - The **maximum focus level** predicted in the 10-hour window.
 - Used to calculate both the optimal time and crash risk.
 
 ### ⚠️ Crash Alert Time
-- If your predicted focus **drops by more than 30%** after the peak, the app flags a **crash time**.
-- Helps users prepare for a dip in energy and plan breaks accordingly.
+- If your predicted focus **drops significantly** after the peak, the app flags a **crash time**.
+- L-Theanine supplementation smooths out the curve, potentially delaying or mitigating severe crashes.
 
-### 📊 Average Focus
+### 📊 Hourly Focus Simulation
 - The **mean focus level** across the 10-hour period.
-- Gives an overall picture of your **day’s energy quality**.
-- *Coming soon*: Visible on dashboard for deeper insight.
+- Factors in metabolism rate (which affects the decay rate of caffeine in your system).
 
 ---
 
@@ -80,17 +78,18 @@ Using a trained Machine Learning model, this tracker predicts:
 1. User inputs:
    - Hours of sleep last night
    - Current fatigue level
-   - Amount of caffeine intake (mg)
+   - Amount of caffeine intake (mg) or Preset
+   - Bio-Profile Rules (Tolerance, Metabolism, L-Theanine)
 
-2. Backend (`/predict`) uses trained ML model to:
-   - Predict a **base focus level**
-   - Simulate hourly variations over 10 hours
-   - Compute **optimal time** and **potential crash**
+2. Backend (`/predict`) uses the trained ML model combined with pharmacokinetic multipliers:
+   - Predicts a **base focus level**
+   - Simulates hourly variations over 10 hours applying decay and peak multipliers
+   - Computes **optimal time**, **potential crash**, and generates customized **actionable advice**
 
 3. Frontend displays:
-   - Focus graph
-   - Optimal & crash alert cards
-   - Loading spinner
+   - Interactive focus graph
+   - Optimal & crash alert metrics
+   - Real-time advice and insights
 
 ---
 
@@ -98,8 +97,8 @@ Using a trained Machine Learning model, this tracker predicts:
 
 ```bash
 # Clone repo
-git clone https://github.com/yourusername/caffeine-efficiency-tracker.git
-cd caffeine-efficiency-tracker
+git clone https://github.com/CodeNameSS24/caffeine_efficiency_tracker.git
+cd caffeine_efficiency_tracker
 
 # Install Python backend dependencies
 cd backend
@@ -115,3 +114,4 @@ python caffeine_efficiency_api.py
 cd ../frontend
 npm install
 npm start
+```
