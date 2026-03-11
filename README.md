@@ -34,10 +34,11 @@ Using a trained Machine Learning model (RandomForestRegressor) integrated with d
 
 ## 📸 Screenshots
 
-![Screenshot 2025-06-23 205926](https://github.com/user-attachments/assets/d36a5576-504b-4326-9b48-dc152f4d7d23)
-![Screenshot 2025-06-23 210030](https://github.com/user-attachments/assets/3a9e3fad-163e-4b01-8743-5d9394031824)
-![Screenshot 2025-06-23 210108](https://github.com/user-attachments/assets/50da02df-5ac9-479c-bd11-bc7095238af5)
-![Screenshot 2025-06-23 210141](https://github.com/user-attachments/assets/bbfe06b6-e559-4f1c-bb59-a9bed45417ec)
+### Setup & Bio-Profile Config
+![Caffeine Tracker App View](./docs/assets/app_view.png)
+
+### Results & Focus Prediction
+![Caffeine Tracker Results View](./docs/assets/results_view.png)
 
 ---
 
